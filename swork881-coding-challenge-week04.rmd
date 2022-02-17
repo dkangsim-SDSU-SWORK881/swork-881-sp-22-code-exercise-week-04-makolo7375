@@ -2,22 +2,24 @@
 title:  'Coding Challenge #4'
 subtitle: 'SWORK 881'
 author:
-- name: Student -  [Your name goes here]
+- name: Student -  Mele'ana K. 'Akolo
 output: html_document
 ---
 
 ## load libraries
 ```{r}
-
+library(tidyverse)
+library(tidymodels)
+library(nnet)
+library(MASS)
+library(splines)
+library(dplyr)
 ```
 
 ## load dataset
 ```{r}
-
-
-
+data.01<- read.csv("Data/LHS_exercise_02102022.csv")
 ```
-
 
 #data wrangling
 
@@ -33,7 +35,28 @@ We will be creating new variables:
 
 
 ```{r}
-
+data.01<- data.01%>%
+  mutate(anxiety = case_when(phq4_1 >= 3 ~1,
+                             TRUE ~ 0))
+data.01<- data.01%>%
+  mutate(depression = case_when(phq4_1 >=3 ~1,
+                             TRUE ~ 0))
+  data.01<- data.01 %>%
+    mutate(distress = case_when(phq4_1 >=3 ~1,
+                             TRUE ~ 0))
+   data.03<- data.01%>%
+    mutate(distress_avg = rowMeans(across(phq1_1:phq4_1)),
+           distress_avg_rev = 4-distress_avg,
+           distress_sum_rev = distress_avg_rev*4)%>%
+    dplyr::select(distress_sum_rev, age, sex, education)
+   data.02$distress_types= as.factor(data.02$distress_types)
+  data.02$distress_types2<- relevel(data.02$distress_types, ref = phq4_1)
+  data.02$distress_types2 <- str_c(var0-none, '', var1- anxiety,"",var2- dep,"",var3- anxiety & dep)
+  data.02<-data.01 %in%
+    dplyr::select (low, mid, high) %in%
+    mutate(distress_cat =
+             case_when(distress == min:4 ~ low, 5:8 ~ mid, 8:max ~ high))
+data.02$age_sd<- scale(data.02$age)
 
 ```
 
@@ -57,7 +80,8 @@ Use your typical list of independent variables (standardized age, sex, education
 _hint_: use `nnet` package's `multinom` function
 
 ```{r}
-
+fit.mlr<- multinom(distress_types2, age+ factor(sex) + factor(education),
+                   data = data.03)
 ```
 
 Please note your interpretation unit and your outcome unit must be the same. If needed, trasnform your output to facilitate  your interpretation.
